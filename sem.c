@@ -34,14 +34,14 @@ void tsem_free (tsem_t *sem) {
 
 void tsem_wait (tsem_t *sem) {
 
+    pthread_mutex_lock(&(sem->mutex));
     sem->value--;
 
     if(sem->value < 0){
         // wait
-        pthread_mutex_lock(&(sem->mutex));
         pthread_cond_wait(&(sem->cond), &(sem->mutex));
-        pthread_mutex_unlock(&(sem->mutex));
     }
+    pthread_mutex_unlock(&(sem->mutex));
 }
 
 int tsem_try_wait (tsem_t *sem) {
@@ -55,8 +55,12 @@ int tsem_try_wait (tsem_t *sem) {
 }
 
 void tsem_signal (tsem_t *sem) {
+    
+    pthread_mutex_lock(&(sem->mutex));
     sem->value += 1;
 
-    // notify
-    pthread_cond_signal(&(sem->cond));
+    if(sem->value <= 0) {
+        pthread_cond_signal(&(sem->cond));
+    }
+    pthread_mutex_unlock(&(sem->mutex));
 }
