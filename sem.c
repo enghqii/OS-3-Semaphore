@@ -55,7 +55,7 @@ int tsem_try_wait (tsem_t *sem) {
 }
 
 void tsem_signal (tsem_t *sem) {
-    
+
     pthread_mutex_lock(&(sem->mutex));
     sem->value += 1;
 

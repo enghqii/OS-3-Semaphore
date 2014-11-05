@@ -41,8 +41,8 @@ void * thread_func (void *arg) {
 
         update_status (i, 1);
 
-        tsem_signal(chopstick[i]);
         tsem_signal(chopstick[(i + 1) % 5]);
+        tsem_signal(chopstick[i]);
         tsem_signal(room);
         //printf("[%d] signal to room\n",i);
 
