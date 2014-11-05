@@ -9,38 +9,54 @@
 
 struct test_semaphore
 {
-  /* not yet implemented. */
+    pthread_mutex_t mutex;
+    pthread_cond_t  cond;
+    int value;
 };
 
-tsem_t *
-tsem_new (int value)
-{
-  /* not yet implemented. */
+tsem_t * tsem_new (int value) {
 
-  return NULL;
+    tsem_t * ret = (tsem_t *) malloc(sizeof(tsem_t));
+
+    if(ret == NULL) {
+        return NULL;
+    }else {
+        ret->value = value;
+        pthread_mutex_init(&(ret->mutex), NULL);
+        pthread_cond_init(&(ret->cond), NULL);
+    }
+    return ret;
 }
 
-void
-tsem_free (tsem_t *sem)
-{
-  /* not yet implemented. */
+void tsem_free (tsem_t *sem) {
+    free(sem);
 }
 
-void
-tsem_wait (tsem_t *sem)
-{
-  /* not yet implemented. */
+void tsem_wait (tsem_t *sem) {
+
+    sem->value--;
+
+    if(sem->value < 0){
+        // wait
+        pthread_mutex_lock(&(sem->mutex));
+        pthread_cond_wait(&(sem->cond), &(sem->mutex));
+        pthread_mutex_unlock(&(sem->mutex));
+    }
 }
 
-int
-tsem_try_wait (tsem_t *sem)
-{
-  /* not yet implemented. */
+int tsem_try_wait (tsem_t *sem) {
 
-  return 1;
+    if(sem->value >= 1){
+        sem->value--;
+        return 0;
+    }else{
+        return 1;
+    }
 }
 
-void tsem_signal (tsem_t *sem)
-{
-  /* not yet implemented. */
+void tsem_signal (tsem_t *sem) {
+    sem->value += 1;
+
+    // notify
+    pthread_cond_signal(&(sem->cond));
 }

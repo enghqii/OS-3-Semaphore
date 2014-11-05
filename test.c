@@ -49,6 +49,7 @@ main (int    argc,
     {
       tsem_wait (finish_sem[idx]);
       tsem_free (finish_sem[idx]);
+
       tsem_free (start_sem[idx]);
     }
 
