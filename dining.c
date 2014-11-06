@@ -19,13 +19,15 @@ static void update_status (int i, int eating) {
 
     status[i] = eating;
 
+    if(eating == 0) return;
+
     tsem_wait (printing);
     for (idx = 0; idx < 5; idx++) {
         fprintf(stdout, "%3s     ", status[idx] ? "EAT" : "...");
     }
     fprintf (stdout, "\n");
-
     tsem_signal (printing);
+
 }
 
 void * thread_func (void *arg) {
@@ -33,22 +35,49 @@ void * thread_func (void *arg) {
     int i = (int) (long) arg;
 
     do{
-        //printf("[%d] is now on the loop\n", i);
+        /*
+        int leftFork = i;
+        int rightFork = (i - 1 + 5) % 5;
+
+        int forkPickedUp;
+        int otherFork;
+        int pickedUp;
+
+        if( leftFork > rightFork ){
+            forkPickedUp = leftFork;
+            otherFork = rightFork;
+        } else {
+            forkPickedUp = rightFork;
+            otherFork = leftFork;
+        }
+
+        pickedUp = tsem_try_wait(chopstick[forkPickedUp]);
+
+        if( pickedUp == 0 ){
+            int pickedUpOther = tsem_try_wait(chopstick[otherFork]);
+
+            if(pickedUpOther == 0){
+                update_status (i, 1);
+                tsem_signal(chopstick[otherFork]);
+            }
+            tsem_signal(chopstick[forkPickedUp]);
+        }
+
+        update_status(i, 0);
+*/
         tsem_wait(room);
-        //printf("[%d] waited for room\n",i);
         tsem_wait(chopstick[i]);
         tsem_wait(chopstick[(i + 1) % 5]);
 
         update_status (i, 1);
 
-        tsem_signal(chopstick[(i + 1) % 5]);
         tsem_signal(chopstick[i]);
-        tsem_signal(room);
-        //printf("[%d] signal to room\n",i);
+        tsem_signal(chopstick[(i + 1) % 5]);
 
         update_status (i, 0);
 
-        //printf("[%d] end of loop\n",i);
+        tsem_signal(room);
+
     }
     while (1);
   

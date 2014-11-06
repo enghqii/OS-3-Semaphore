@@ -38,7 +38,6 @@ void tsem_wait (tsem_t *sem) {
     sem->value--;
 
     if(sem->value < 0){
-        // wait
         pthread_cond_wait(&(sem->cond), &(sem->mutex));
     }
     pthread_mutex_unlock(&(sem->mutex));
@@ -46,10 +45,17 @@ void tsem_wait (tsem_t *sem) {
 
 int tsem_try_wait (tsem_t *sem) {
 
+    pthread_mutex_lock(&(sem->mutex));
+
     if(sem->value >= 1){
+
         sem->value--;
+        pthread_mutex_unlock(&(sem->mutex));
         return 0;
+
     }else{
+
+        pthread_mutex_unlock(&(sem->mutex));
         return 1;
     }
 }
